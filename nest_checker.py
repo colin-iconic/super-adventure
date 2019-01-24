@@ -14,9 +14,9 @@ clear()
 
 before = dict([(f, None) for f in next(os.walk('.'))[1]])
 
-homedir = r'/nas/Laser NC Codes/Nest Checker'
+homedir = r'/nas/Production/Laser NC Codes/Nest Checker'
 #homedir = r'C:\Users\mcolin\Desktop\Nest Checker'
-tasksdir = r'/nas/Laser NC Codes/LP/(0000) MetaCAM Report'
+tasksdir = r'/nas/Production/Laser NC Codes/LP/(0000) MetaCAM Report'
 #tasksdir = r'C:\Users\mcolin\Desktop\Nest Checker\Reports'
 
 while True:
@@ -26,7 +26,7 @@ while True:
 		copyfile(r'data.js', r'temp_data.js')
 		os.chdir(tasksdir)
 		after = dict([(f, None) for f in next(os.walk('.'))[1]])
-		
+
 		for task in sorted(after.keys(), reverse=True):
 			if task in ['Archive', 'NCR'] or task.startswith('New folder'):
 				print('Skipping...' + task)
@@ -40,11 +40,11 @@ while True:
 				except ValueError:
 	#				print('Could not process folder: ' + task + '\n Please rename with job numbers.')
 					continue
-			
+
 			os.chdir(tasksdir+'\\'+task)
 
 			report = []
-			
+
 			filelist = os.listdir(tasksdir+'\\'+task)
 			flist = []
 			dfiles = []
@@ -56,9 +56,9 @@ while True:
 					flist.append([each, os.path.basename(each)[14:-5]])
 				else:
 					flist.append([each, os.path.basename(each)[14:-4]])
-			
+
 			duplicates = []
-			
+
 			for i, x in enumerate(flist):
 				for a in flist:
 					if x[1] == a[1] and x[0] != a[0]:
@@ -67,15 +67,15 @@ while True:
 							flist.remove(x)
 						if a in flist:
 							flist.remove(a)
-			
+
 			if not os.path.isdir(tasksdir+'\\'+task+'\\Archive'):
 				os.makedirs(tasksdir+'\\'+task+'\\Archive')
-				
+
 			for each in duplicates:
 				each = sorted(each, key=lambda x: x[0])
 				for i in range(len(each)-1):
 					os.rename(each[i][0], tasksdir+'\\'+task+'\\Archive\\'+each[i][0])
-			
+
 			#changing from log folder edit time
 			mtime = os.path.getmtime(tasksdir+'\\'+task)
 			now = time.time()
@@ -84,7 +84,7 @@ while True:
 				for file in os.listdir(tasksdir+'\\'+task):
 					if file.endswith(".pdf"):
 						report.append(file)
-						
+
 			layouts = []
 			#open nesting results
 			tasks = {}
@@ -101,7 +101,7 @@ while True:
 					print('Error. No file entered, or file not found.\nCheck %s.') % (fname)
 					input("Press Enter to continue...")
 					sys.exit(0)
-				
+
 				currentpage = 0
 				pagecount = pdf.doc.catalog['Pages'].resolve()['Count']
 				while currentpage < pagecount:
@@ -111,33 +111,33 @@ while True:
 					except:
 						print('could not load page')
 						break
-					
+
 					#skip nesting reports
 					nesting = pdf.pq('LTTextLineHorizontal:contains("Nesting")')
 					if nesting:
 						break
-					
+
 
 					#for each layout report
 					programname = pdf.pq('LTTextLineHorizontal:in_bbox("300, 500, 800, 530")').text()[29:-3]
 					taskname = pdf.pq('LTTextLineHorizontal:in_bbox("15, 500, 255, 530")').text()[33:-4]
-					
+
 					if not (programname and taskname):
 						if not (programname or taskname):
 							print('No program or task name: ' + task + '\\' + fname)
 							currentpage += 1
 							continue
-							
+
 						if not programname:
 							programname = taskname
-							
+
 						if not taskname:
 							try:
 								taskname = programname.split('-')[-2]
 							except IndexError:
 								taskname = programname
-								
-					created = pdf.pq('LTTextLineHorizontal:contains("Date:")').text()[5:]			
+
+					created = pdf.pq('LTTextLineHorizontal:contains("Date:")').text()[5:]
 					copies = pdf.pq('LTTextLineHorizontal:in_bbox("153, 485, 183, 510")').text()
 					if copies == '':
 						print('No copies, no parts?')
@@ -165,18 +165,18 @@ while True:
 					except:
 						print('No pierces, no parts?')
 						break
-					
+
 					#get part name and qty in sheet
 					lineposition = 190
 					name = pdf.pq('LTTextLineHorizontal:in_bbox("70, %s, 315, %s")' %(lineposition, lineposition + 30)).text()
-					
+
 					while name is not '':
 						quantity = pdf.pq('LTTextLineHorizontal:in_bbox("360, %s, 425, %s")' %(lineposition, lineposition + 30)).text()
 						quantity = int(quantity) * copies
 						parts.append({'name': name, 'quantity': quantity})
 						lineposition -= 13.32
 						name = pdf.pq('LTTextLineHorizontal:in_bbox("70, %s, 315, %s")' %(lineposition, lineposition + 30)).text()
-					
+
 					program = {
 						"name": programname,
 						"filename": fname,
@@ -189,7 +189,7 @@ while True:
 						"pierces": pierces,
 						"parts": parts
 					}
-					
+
 					nextpage = currentpage + 1
 					#check if 2nd page of a layout
 					if nextpage < pagecount:
@@ -198,19 +198,19 @@ while True:
 						except Exception as exception:
 							print('Page load failed.', exception)
 							input("Press Enter to continue...")
-							
+
 						plocation = pdf.pq('LTTextLineHorizontal:contains("Part No")')
 						try:
 							plocation = float(plocation.attr('y0'))
-							
+
 						except ValueError:
 							print('Could not find "Part No"')
 							input("Press Enter to continue...")
-							
+
 						if plocation is not '' and plocation > 250:
 							lineposition = 505
 							name = pdf.pq('LTTextLineHorizontal:in_bbox("70, %s, 315, %s")' %(lineposition, lineposition + 30)).text()
-							
+
 							while name is not '':
 								quantity = pdf.pq('LTTextLineHorizontal:in_bbox("360, %s, 400, %s")' %(lineposition, lineposition + 30)).text()
 								quantity = int(quantity) * copies
@@ -218,12 +218,12 @@ while True:
 								lineposition -= 13.32
 								name = pdf.pq('LTTextLineHorizontal:in_bbox("70, %s, 315, %s")' %(lineposition, lineposition + 30)).text()
 							currentpage += 1
-					
+
 					for part in parts:
 						part['material'] = material
 						part['thickness'] = thickness
-					
-					
+
+
 					if not taskname in tasks:
 						tasks[taskname] = {'jobnumbers': jobnumbers, 'layouts': [program]}
 						tasks[taskname]['parts'] = parts
@@ -233,11 +233,11 @@ while True:
 						partlist = []
 						for each in parts:
 							partlist.append(each['name'])
-						
+
 						parttot = []
 						for each in tasks[taskname]['parts']:
 							parttot.append(each['name'])
-						
+
 						partadd = set(partlist).intersection(parttot)
 						for i, e in enumerate(parts):
 							if e['name'] in partadd:
@@ -252,10 +252,10 @@ while True:
 								continue
 							else:
 								c += 1
-								
+
 						if c == len(tasks[taskname]['sheets']):
 							tasks[taskname]['sheets'].append({'size': program['size'], 'material': program['material'], 'thickness': program['thickness'], 'quantity': program['copies']})
-					
+
 					print(task + ': ' + fname + ' page ' + str(currentpage) + ' processed.')
 					currentpage += 1
 				pdf.file.close()
@@ -264,21 +264,21 @@ while True:
 				with open(homedir + r'\data.pickle', 'rb') as pfile:
 					try:
 						data = pickle.load(pfile)
-						
+
 					except EOFError:
 						print('no pickle')
 						data = {}
-						
+
 					except Exception as exception:
 						print(Exception)
 						data = {}
 						pass
-						
+
 			data.update(tasks)
-			
+
 			with open(homedir + r'\data.pickle', 'wb') as data_file:
 				pickle.dump(data, data_file, protocol=pickle.HIGHEST_PROTOCOL)
-			
+
 			with open(homedir + r'\temp_data.js', 'w') as jfile:
 				jfile.write('var data = ')
 				json.dump(data, jfile)
