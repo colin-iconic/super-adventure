@@ -1,0 +1,126 @@
+<html>
+	<head>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+		<script src="data.js"></script>
+		<script src="tinySort.js"></script>
+		<script src='sortElements.js'></script>
+		<script type='text/javascript'>
+			$(document).ready(function() {
+				for (var task in data) {
+					var report = [
+						'<div id=\"' + task + '\">',
+						'<table>',
+						'<tbody>',
+							'<tr>',
+								'<td colspan="4" style="text-align:center;border-bottom:solid 1px black;">' + task + '</td>',
+							'</tr>',
+							'<tr>',
+								'<td colspan="2" style="text-align:center;border-bottom:solid 1px black;">Job Numbers</td>',
+								'<td colspan="2" style="text-align:center;border-bottom:solid 1px black;">Date</td>',
+							'</tr>',
+							'<tr>',
+								'<td colspan="2" style="text-align:center;border-bottom:solid 1px black;">' + data[task]['jobnumbers'] + '</td>',
+								'<td colspan="2" style="text-align:center;border-bottom:solid 1px black;" class="date">' + data[task]['layouts'][0]['date'] + '</td>',
+							'</tr>'
+					].join('\n');
+					report += [							
+						'<tr>',
+							'<td style="text-align:center;border-bottom:solid 1px black;">Sheet Material</td>',
+							'<td style="text-align:center;border-bottom:solid 1px black;">Sheet Thickness</td>',
+							'<td style="text-align:center;border-bottom:solid 1px black;">Sheet Size</td>',
+							'<td style="text-align:center;border-bottom:solid 1px black;">Quantity</td>',
+						'</tr>'
+					].join('\n');
+					for (var sheet in data[task]['sheets']) {
+						var sheets = [
+							'<tr>',
+								'<td style="text-align:center;border-bottom:solid 1px black;">' + data[task]['sheets'][sheet]['material'] + '</td>',
+								'<td style="text-align:center;border-bottom:solid 1px black;">' + data[task]['sheets'][sheet]['thickness'] + '</td>',
+								'<td style="text-align:center;border-bottom:solid 1px black;">' + data[task]['sheets'][sheet]['size'] + '</td>',
+								'<td style="text-align:center;border-bottom:solid 1px black;">' + data[task]['sheets'][sheet]['quantity'] + '</td>',
+							'</tr>'
+						].join('\n');
+						report = report + sheets;
+					}
+					report += [							
+						'<tr>',
+							'<td style="text-align:center;border-bottom:solid 1px black;">Quantity</td>',
+							'<td style="text-align:center;border-bottom:solid 1px black;">Part Number</td>',
+							'<td style="text-align:center;border-bottom:solid 1px black;">Material</td>',
+							'<td style="text-align:center;border-bottom:solid 1px black;">Thickness</td>',
+						'</tr>'
+					].join('\n');
+					for (var part in data[task]['parts']) {
+						var partsummary = [
+							'<tr>',
+								'<td style="text-align:right;border-right:solid 1px black">' + data[task]['parts'][part]['quantity'] + '</td>',
+								'<td class = "part" style="border-right:solid 1px black">' + data[task]['parts'][part]['name'] + '</td>',
+								'<td style="border-right:solid 1px black">' + data[task]['parts'][part]['material'] + '</td>',
+								'<td>' + data[task]['parts'][part]['thickness'] + '</td>',
+							'</tr>'
+						].join('\n');
+						report = report + partsummary
+					}
+					report += [
+						'</tbody>',
+						'</table>',
+						'<button id="' + task + '_print">Print Report</button>',
+						'</div>'
+					].join('\n');
+					$('#body').append(report);
+					
+					myComparator = function(a, b){
+						return $(a).text() > $(b).text() ? 1 : -1;
+					}
+					
+					$('#' + task + ' .part').sortElements(myComparator, function (){
+						return this.parentNode;
+					});
+				}
+			});
+		</script>
+		<script type="text/javascript">
+			$(document).ready(function() {
+				tinysort('body>div', {selector:'td.date',ignoreDashes:true,order:'desc'});
+				
+				$(':button').click(function() {
+					buttonid = $(this).attr('id');
+					tableid = buttonid.substring(0, buttonid.length - 6);
+					docprint = $('#' + tableid + ' table');
+					docprint = [
+						'<style type="text/css">',
+						'table {',
+							'margin-bottom: 50px;',
+							'border: 2px solid black;',
+							'border-spacing: 0px;',
+							'min-width: 500px;',
+						'}',
+						'td {',
+							'padding-left: 10px;',
+							'padding-right: 10px;',
+						'}',
+						'</style>'
+					].join('\n') + docprint[0].outerHTML;
+					newWin = window.open("");
+					newWin.document.write(docprint); //not working
+					newWin.print();
+					newWin.close();	
+				});
+			});
+		</script>
+		<style type="text/css">
+			table {
+				margin-top: 50px;
+				border: 2px solid black;
+				border-spacing: 0px;
+				min-width: 500px;
+			}
+			td {
+				padding-left: 10px;
+				padding-right: 10px;
+			}
+		</style>
+	</head>
+	<body id='body'>
+	</body>
+</html>

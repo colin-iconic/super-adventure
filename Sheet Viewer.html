@@ -1,0 +1,63 @@
+<html>
+	<head>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+		<script src="data.js"></script>
+		<script src="tinySort.js"></script>
+		<script src='sortElements.js'></script>
+		<script type='text/javascript'>
+			$(document).ready(function() {
+				var report = [];
+				for (var task in data) {
+					for (var sheet in data[task]['sheets']) {
+						var sheets = [
+							'<tr>',
+								'<td style="text-align:center;border-bottom:solid 1px black;">Material</td>',
+								'<td style="text-align:center;border-bottom:solid 1px black;">Thickness</td>',
+								'<td style="text-align:center;border-bottom:solid 1px black;">Size</td>',
+								'<td style="text-align:center;border-bottom:solid 1px black;">Quantity</td>',
+								'<td style="text-align:center;border-bottom:solid 1px black;">Date</td>',
+								'<td style="text-align:center;border-bottom:solid 1px black;">Job Number(s)</td>',
+							'</tr>',
+							'<tr>',
+								'<td style="text-align:center;border-bottom:solid 1px black;">' + data[task]['sheets'][sheet]['material'] + '</td>',
+								'<td style="text-align:center;border-bottom:solid 1px black;">' + data[task]['sheets'][sheet]['thickness'] + '</td>',
+								'<td style="text-align:center;border-bottom:solid 1px black;">' + data[task]['sheets'][sheet]['size'] + '</td>',
+								'<td style="text-align:center;border-bottom:solid 1px black;">' + data[task]['sheets'][sheet]['quantity'] + '</td>',
+								'<td class="date" style="text-align:center;border-bottom:solid 1px black;">' + data[task]['layouts'][0]['date'] + '</td>',
+								'<td style="text-align:center;border-bottom:solid 1px black;">' + task + '</td>',
+							'</tr>'
+						].join('\n');
+					}
+					$('#body').append(sheets);
+				}
+				myComparator = function(a, b){
+					return $(a).text() > $(b).text() ? 1 : -1;
+				}
+				
+				$('.date').sortElements(myComparator, function (){
+					return this.parentNode;
+				});
+			});
+		</script>
+		<style type="text/css">
+			table {
+				margin-top: 50px;
+				border: 2px solid black;
+				border-spacing: 0px;
+				min-width: 500px;
+			}
+			td {
+				padding-left: 10px;
+				padding-right: 10px;
+			}
+		</style>
+	</head>
+	<body id='body'>
+		<div id="sheets">
+			<table>
+				<tbody>
+					<tr><td colspan=4>Sheets</td></tr>
+					
+				
+	</body>
+</html>
