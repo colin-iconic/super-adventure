@@ -23,7 +23,7 @@ while True:
 	try:
 		print('Begin scanning at:\n' + time.ctime())
 		os.chdir(homedir)
-		copyfile(r'data.js', r'temp_data.js')
+		copyfile(homedir + r'/data.js', homedir + r'/temp_data.js')
 		os.chdir(tasksdir)
 		after = dict([(f, None) for f in next(os.walk('.'))[1]])
 
