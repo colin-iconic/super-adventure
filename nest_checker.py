@@ -21,6 +21,7 @@ tasksdir = r'/nas/Production/Laser NC Codes/LP/(0000) MetaCAM Report'
 
 while True:
 	try:
+		os.remove(homedir + r'/temp_data.js')
 		print('Begin scanning at:\n' + time.ctime())
 		os.chdir(homedir)
 		copyfile(homedir + r'/data.js', homedir + r'/temp_data.js')
